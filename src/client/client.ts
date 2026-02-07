@@ -443,10 +443,10 @@ export class LaftelClient {
     cardNumber: string | number; // TODO: JSDoc maybv
     expMonth: Raw.from0to12;
     expYear: Raw.from0to99;
-    birth: string; // 내가 너는 봐줬다 ㅋㅋ
+    birth: string;
     pwd: Raw.from0to99;
   }): Promise<Raw.BillingInfo | string> {
-    // TODO: FIXME: 존나더러운건 둘째치고 에러를 하나하나씩 체크해서 유저 입장에서도 좆같음. 걍 클라에서 검증하는거 뺴야할지도
+    // TODO: FIXME: 존나더러운건 둘째치고 에러를 하나하나씩 체크해서 유저 입장에서도 좆같음.
     if (!payload || typeof payload != "object")
       return "페이로드가 입력되지 않았습니다.";
     let cardNumber = payload.cardNumber?.toString();
@@ -559,9 +559,9 @@ export class LaftelClient {
     );
   }
 
-  /** 결제 비밀번호 초기화 요청을 전달하지만 보안상의 이유로 등록된 카드도 모두 삭제됨
+  /** 결제 비밀번호를 초기화함으로써 등록된 카드도 모두 삭제함
    * @alias resetPayPassword */ deleteCards = this.resetPayPassword;
-  /** 결제 비밀번호 초기화 요청을 전달하지만 보안상의 이유로 등록된 카드도 모두 삭제됨
+  /** 결제 비밀번호를 초기화함으로써 등록된 카드도 모두 삭제함
    * @alias resetPayPassword */ removeCards = this.resetPayPassword;
 
   /** @private */
