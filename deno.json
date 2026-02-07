@@ -1,0 +1,10 @@
+{
+    "name": "@bsdrop/laftel-ts",
+    "version": "0.0.1",
+    "exports": "./mod.ts",
+    "fmt": {
+        "useTabs": false,
+        "lineWidth": 120,
+        "indentWidth": 2
+    }
+}
