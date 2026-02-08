@@ -83,7 +83,7 @@ export class LaftelClient {
     return Mappers.mapStreamInfo(res as Raw.StreamingInfoV2);
   }
 
-  /** @param ignoreLimit - True인 경우, 자동으로 updatePlayback 호출하여 플레이어를 종료한 것으로 서버를 속입니다. */
+  /** @param ignoreLimit - True인 경우, 자동으로 updatePlayback 호출하여 플레이어를 종료했다고 전달합니다. */
   async getVideoStream(
     episodeId: number,
     ignoreLimit: boolean = false,
