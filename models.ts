@@ -1,7 +1,7 @@
 export type Paginated<T> = {
   total: number;
   items: T[];
-  next?: string | null;
+  next?: string;
 };
 
 export type ImageSet = {
@@ -16,62 +16,47 @@ export type TimeRange = {
   end: number;
 };
 
-export type Profile = {
-  id: number;
-  name: string;
-  avatar: string;
-  status?: string;
-  rank?: {
-    level: number;
-    days: number | null;
-  };
-  isMain: boolean;
-  isLocked: boolean;
-  ageRating: number;
+export type AnimeAttributes = {
+  adult: boolean;
+  exclusive: boolean;
+  original: boolean;
+  laftelOnly: boolean;
+  dubbed: boolean;
+  uncensored: boolean;
+  ending: boolean;
 };
 
 export type Anime = {
   id: number;
-  name: string;
-  summary: string;
+  title: string;
+  description: string;
   images: ImageSet;
   genres: string[];
-  medium: string;
-  rating: number;
-  ageLimit: number;
-
-  flags: {
-    isAdult: boolean;
-    isExclusive: boolean;
-    isOriginal: boolean;
-    isLaftelOnly: boolean;
-    isDubbed: boolean;
-    isUncensored: boolean;
-    isEnding: boolean;
-  };
+  format: string;
+  attributes: AnimeAttributes;
+  ageRating: number;
+  userScore: number;
 };
 
 export type Episode = {
   id: number;
-  number: string;
+  index: string;
   title?: string;
   thumbnail?: string;
   duration?: string;
-  isFree: boolean;
-  isViewing: boolean;
+  free: boolean;
+  viewing: boolean;
   publishedAt?: Date;
 };
 
+export type DRMInfo = {
+  token: string | null;
+  contentId: string;
+  accessType: string;
+};
+
 export type StreamInfo = {
-  urls: {
-    hls?: string;
-    dash?: string;
-  };
-  drm?: {
-    token: string | null;
-    contentId: string;
-    accessType: string;
-  };
+  drm?: DRMInfo;
   markers?: {
     opening?: TimeRange;
     ending?: TimeRange;
@@ -79,22 +64,26 @@ export type StreamInfo = {
   assets: {
     thumbnail?: string;
     subtitle?: string;
+    hls?: string;
+    dash?: string;
   };
   playLogId?: number;
+};
+
+export type Author = {
+  id: number;
+  name: string;
+  avatar: string;
 };
 
 export type Interaction = {
   id: number;
   content: string;
-  author: {
-    id: number;
-    name: string;
-    avatar: string;
-  };
-  createdAt: Date;
+  author: Author;
+  createdAt?: Date;
   likes: number;
-  isSpoiler: boolean;
-  isLiked?: boolean;
+  spoiler: boolean;
+  liked?: boolean;
 };
 
 export type Review = Interaction & {
@@ -103,5 +92,5 @@ export type Review = Interaction & {
 
 export type Comment = Interaction & {
   replyCount?: number;
-  parentId?: number | null;
+  parentId?: number;
 };
