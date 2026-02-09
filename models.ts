@@ -18,12 +18,12 @@ export type TimeRange = {
 
 export type AnimeAttributes = {
   adult: boolean;
-  exclusive: boolean;
-  original: boolean;
-  laftelOnly: boolean;
+  exclusive?: boolean;
+  original?: boolean;
+  laftelOnly?: boolean;
   dubbed: boolean;
   uncensored: boolean;
-  ending: boolean;
+  ending: boolean; // <-- ??
 };
 
 export type Anime = {
@@ -51,8 +51,8 @@ export type Episode = {
 
 export type DRMInfo = {
   token: string | null;
-  contentId: string;
-  accessType: string;
+  contentId: string; // asset_%d
+  accessType: "svod" | (string & {});
 };
 
 export type StreamInfo = {
@@ -66,6 +66,10 @@ export type StreamInfo = {
     subtitle?: string;
     hls?: string;
     dash?: string;
+    preview: {
+      hls?: string;
+      dash?: string;
+    };
   };
   playLogId?: number;
 };

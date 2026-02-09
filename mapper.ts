@@ -4,7 +4,12 @@ import * as Models from "./models.ts";
 function toDate(dateValue: Date | string | number | unknown): Date | undefined {
   if (!dateValue) return undefined;
   if (dateValue instanceof Date) return dateValue;
-
+  if (
+    dateValue instanceof String &&
+    //dateValue.includes("T") &&
+    (!dateValue.includes("+") || !dateValue.includes("Z"))
+  )
+    dateValue += "+09:00";
   try {
     const date = new Date(dateValue as string | number);
     return isNaN(date.getTime()) ? undefined : date;
@@ -91,8 +96,12 @@ export const mapStreamInfo = (raw: Raw.StreamingInfoV2): Models.StreamInfo => {
     assets: {
       thumbnail: publicInfo?.thumbnail,
       subtitle: protectedInfo?.subtitle_url,
-      hls: protectedInfo?.hls_url ?? publicInfo?.hls_preview_url,
-      dash: protectedInfo?.dash_url ?? publicInfo?.dash_preview_url,
+      hls: protectedInfo?.hls_url,
+      dash: protectedInfo?.dash_url,
+      preview: {
+        hls: publicInfo?.hls_preview_url,
+        dash: publicInfo?.dash_preview_url,
+      },
     },
     playLogId: raw.play_log_id,
   };
