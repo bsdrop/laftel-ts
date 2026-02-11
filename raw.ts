@@ -116,7 +116,7 @@ export type ProfilesV1MyAccount =
 
 export type ItemsV4ID = {
   id: number;
-  uid: string; // <<<<<<<< 이씨발련 뭐임???????????? 갑자기 생김
+  uid: string;
   name: string;
   content: string;
   is_adult: boolean;

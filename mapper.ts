@@ -1,3 +1,4 @@
+// \r\n같은 변태 규격 표준화하기
 import * as Raw from "./raw.ts";
 import * as Models from "./models.ts";
 
@@ -6,7 +7,6 @@ function toDate(dateValue: Date | string | number): Date | undefined {
   if (dateValue instanceof Date) return dateValue;
   if (
     typeof dateValue === "string" &&
-    //dateValue.includes("T") &&
     (!dateValue.includes("+") || !dateValue.includes("Z"))
   )
     dateValue += "+09:00";
@@ -70,25 +70,25 @@ export const mapStreamInfo = (raw: Raw.StreamingInfoV2): Models.StreamInfo => {
   return {
     drm: protectedInfo
       ? {
-        token:
-          protectedInfo?.widevine_token ??
-          protectedInfo?.fairplay_token ?? // fairplay인 이상 인생 망함 playready도 아니고 ㅋㅋ
-          null,
-        contentId: protectedInfo.content_id,
-        accessType: protectedInfo.access_type,
-      }
+          token:
+            protectedInfo?.widevine_token ??
+            protectedInfo?.fairplay_token ??
+            null,
+          contentId: protectedInfo.content_id,
+          accessType: protectedInfo.access_type,
+        }
       : undefined,
     markers: playback
       ? {
-        opening:
-          playback.op_start != null && playback.op_end != null
-            ? { start: playback.op_start, end: playback.op_end }
-            : undefined,
-        ending:
-          playback.ed_start != null && playback.ed_end != null
-            ? { start: playback.ed_start, end: playback.ed_end }
-            : undefined,
-      }
+          opening:
+            playback.op_start != null && playback.op_end != null
+              ? { start: playback.op_start, end: playback.op_end }
+              : undefined,
+          ending:
+            playback.ed_start != null && playback.ed_end != null
+              ? { start: playback.ed_start, end: playback.ed_end }
+              : undefined,
+        }
       : undefined,
     assets: {
       thumbnail: publicInfo?.thumbnail,

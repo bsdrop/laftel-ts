@@ -98,8 +98,7 @@ export class LaftelClient {
     return Mappers.mapStreamInfo(raw);
   }
 
-  /**
-   * 재생 상태를 업데이트합니다.
+  /** 재생 상태를 업데이트합니다.
    * @param {number} playLogId - getVideoStream을 통해 얻은 재생 로그 ID
    * @param {Object} status - 업데이트할 재생 상태 객체
    * @param {string} [status.playTime="00:00:00"] - 재생 시간 (형식: HH:MM:SS)
@@ -179,7 +178,7 @@ export class LaftelClient {
       isSpoiler?: boolean;
       parentId?: number;
     } = {},
-  ): Promise<Models.Comment> {
+  ): Promise<Models.Comment | false> {
     const res = await this._request<Raw.CommentItem>("/comments/v1/list/", {
       method: "POST",
       body: JSON.stringify({
@@ -196,7 +195,7 @@ export class LaftelClient {
     commentId: number,
     content: string,
     isSpoiler?: boolean,
-  ): Promise<Models.Comment> {
+  ): Promise<Models.Comment | false> {
     const res = await this._request<Raw.CommentItem>(
       `/comments/v1/${commentId}/`,
       {
@@ -276,7 +275,7 @@ export class LaftelClient {
     options: {
       isSpoiler?: boolean;
     } = {},
-  ): Promise<Models.Review> {
+  ): Promise<Models.Review | false> {
     const res = await this._request<Raw.ReviewsV1MyReview>(
       "/reviews/v1/list/",
       {
@@ -297,7 +296,7 @@ export class LaftelClient {
     score: number,
     content: string,
     isSpoiler?: boolean,
-  ): Promise<Models.Review> {
+  ): Promise<Models.Review | false> {
     const res = await this._request<Raw.ReviewsV1MyReview>(
       `/reviews/v1/${reviewId}/`,
       {
@@ -314,7 +313,7 @@ export class LaftelClient {
 
   async deleteReview(reviewId: number): Promise<boolean> {
     await this._request(`/reviews/v1/${reviewId}/`, { method: "DELETE" });
-    return true;
+    return true; // TODO:
   }
 
   async likeReview(
@@ -329,14 +328,24 @@ export class LaftelClient {
       },
       true,
     );
-    return true;
+    return true; // TODO:
   }
 
   async unlikeReview(reviewId: number): Promise<boolean> {
     return await this.likeReview(reviewId, false);
   }
 
-  /**@private */
+  async getBannedWord(): Promise<string[] | false> {
+    let res = await this._request<Response>("/users/v1/banned_words/", {
+      method: "GET",
+    });
+    if (!res.ok) return false;
+    return (
+      ((await res.json()) as Raw.UsersV1BannedWords).banned_word_list || false
+    );
+  }
+
+  /** @private */
   private async _request<T>(
     path: string,
     options: RequestInit = {},
@@ -378,7 +387,7 @@ export class LaftelClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      // TODO: Error 객체 대신 LaftelError 아래에 또 따로 만들기
+      // TODO: LaftelError
       if (errorData.code === "BLOCKED_BY_DISALLOWED_ACCESS") {
         throw new Error(
           "Geo-blocked: Content is not available outside of South Korea",
@@ -390,7 +399,7 @@ export class LaftelClient {
 
       throw new Error(
         `Request failed: ${response.status} ${response.statusText}\nEndpoint: ${path}\nResponse: ${JSON.stringify(errorData, null, 2)}`,
-      ); // json 아니면 인생 망함
+      );
     }
 
     if (response.status === 204) {
