@@ -1,13 +1,17 @@
 {
-    "name": "@bsdrop/laftel-ts",
-    "version": "0.0.1",
-    "type": "module",
-    "main": "./index.ts",
-    "exports": {
-        ".": "./index.ts"
-    },
-    "scripts": {
-        "test:bun": "bun test.ts",
-        "test:deno": "deno run --allow-net=api.laftel.net,mediacloud.laftel.net,license.pallycon.com,store-api.laftel.net test.ts"
-    }
+  "name": "@bsdrop/laftel-ts",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "scripts": {
+    "test:bun": "bun test.ts",
+    "test:deno": "deno run --allow-net=api.laftel.net,mediacloud.laftel.net,license.pallycon.com,store-api.laftel.net,cdm-project.com,cdrm-project.com,127.0.0.1:8000 test.ts"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  },
+  "dependencies": {}
 }

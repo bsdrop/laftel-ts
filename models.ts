@@ -29,7 +29,8 @@ export type AnimeAttributes = {
 export type Anime = {
   id: number;
   title: string;
-  description: string;
+  /** 추천 영상에는 애니메이션 줄거리가 포함되지 않습니다. */
+  description: string | undefined;
   images: ImageSet;
   genres: string[];
   format: string;
@@ -46,7 +47,7 @@ export type Episode = {
   duration?: string;
   free: boolean;
   viewing: boolean;
-  publishedAt?: Date;
+  publishedAt: Date | null;
 };
 
 export type DRMInfo = {

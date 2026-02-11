@@ -72,7 +72,6 @@ export class LaftelClient {
     );
   }
 
-  /** 마지막에 본 에피소드 */
   async getRecentVideo(animeId: number): Promise<Models.StreamInfo | null> {
     const res = await this._request<Raw.EpisodesV1IDRecentVideo>(
       `/episodes/v1/${animeId}/recent-video/`,

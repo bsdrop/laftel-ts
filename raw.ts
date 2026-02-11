@@ -34,7 +34,15 @@ export type CommonRatingType =
 
 export type CommonMedium = "TVA" | "극장판" | "OVA" | "기타" | (string & {});
 
-export type CommonRatingComponent = "선정성" | "주제" | "폭력성" | "모방위험" | "대사" | "공포" | "약물" | (string & {});
+export type CommonRatingComponent =
+  | "선정성"
+  | "주제"
+  | "폭력성"
+  | "모방위험"
+  | "대사"
+  | "공포"
+  | "약물"
+  | (string & {});
 // KCC/영등위 상 가능성 있음: 차별, 혐오, 도박, 범죄, 음주, 흡연, 담배, 충격, 언어, 음란성, 유해정보
 
 export type MaxEpisodeRating = {
@@ -47,7 +55,10 @@ export type MaxEpisodeRating = {
 };
 
 export type CommonPerson = { name?: string; role?: string };
-export type CommonCast = { character_name?: string; voice_actor_names?: string[] };
+export type CommonCast = {
+  character_name?: string;
+  voice_actor_names?: string[];
+};
 export type CommonProductionCompany = { name?: string };
 
 export type Version = {
@@ -61,86 +72,91 @@ export type ProfileRank = {
   continued_membership_days?: number | unknown;
 };
 
-export type ProfilesV1MyProfile = {
-  id?: number;
-  account_id?: number;
-  name?: string;
-  image?: string;
-  status?: string;
-  profile_rank?: ProfileRank;
-  is_locked?: boolean;
-  is_for_kids?: boolean;
-  content_rating?: number;
-  is_default?: boolean;
-  is_main?: boolean;
-} | WTF;
+export type ProfilesV1MyProfile =
+  | {
+      id: number;
+      account_id: number;
+      name: string;
+      image: string;
+      status: string;
+      profile_rank: ProfileRank;
+      is_locked: boolean;
+      is_for_kids: boolean;
+      content_rating: number;
+      is_default: boolean;
+      is_main: boolean;
+    }
+  | WTF;
 
 export type ProfilesV2ID = Omit<ProfilesV1MyProfile, "is_for_kids">;
 export type ProfilesV2List = PaginatedResponse<ProfilesV2ID>;
 
-export type ProfilesV1MyAccount = {
-  id: number;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  verified_email?: string;
-  is_duplicated_email?: boolean;
-  has_password?: boolean;
-  certified?: boolean;
-  is_adult?: boolean;
-  is_agree_to_terms?: boolean;
-  account_types?: string[];
-  asset_point?: number;
-  has_pay_password?: boolean;
-} | {
-  detail?: string; // Error detail
-  code?: string;   // Error code
-};
+export type ProfilesV1MyAccount =
+  | {
+      id: number;
+      username?: string;
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+      verified_email?: string;
+      is_duplicated_email?: boolean;
+      has_password?: boolean;
+      certified?: boolean;
+      is_adult?: boolean;
+      is_agree_to_terms?: boolean;
+      account_types?: string[];
+      asset_point?: number;
+      has_pay_password?: boolean;
+    }
+  | {
+      detail?: string;
+      code?: string;
+    }
+  | WTF;
 
 export type ItemsV4ID = {
   id: number;
-  uid?: string; // <<<<<<<< 이씨발련 뭐임???????????? 갑자기 생김
+  uid: string; // <<<<<<<< 이씨발련 뭐임???????????? 갑자기 생김
   name: string;
-  content?: string;
-  is_adult?: boolean;
-  is_uncensored?: boolean;
-  is_dubbed?: boolean;
-  is_laftel_only?: boolean;
-  is_laftel_original?: boolean;
-  is_ending?: boolean;
-  is_exclusive?: boolean;
-  is_avod?: boolean;
-  is_svod?: boolean;
-  is_new_release?: boolean;
-  is_upcoming_release?: boolean;
-  is_episode_existed?: boolean;
-  medium?: CommonMedium;
-  images?: CommonImage[];
+  content: string;
+  is_adult: boolean;
+  is_uncensored: boolean;
+  is_dubbed: boolean;
+  is_laftel_only: boolean;
+  is_laftel_original: boolean;
+  is_ending: boolean;
+  is_exclusive: boolean;
+  is_avod: boolean;
+  is_svod: boolean;
+  is_new_release: boolean;
+  is_upcoming_release: boolean;
+  is_episode_existed: boolean;
+  medium: CommonMedium;
+  images: CommonImage[];
   genre: string[];
-  release_weekdays?: string[];
-  latest_episode_release_datetime?: Date | string | null;
-  avg_rating?: number;
-  logo_img?: string | null;
-  color_code?: string | null;
-  description?: string | null;
-  is_viewing?: boolean;
-  highlight_video?: CommonHighlightVideo | null;
-  awards?: string[];
-  notice?: string;
-  tags?: string[];
-  production?: string | null;
-  air_year_quarter?: string | null;
-  copyright?: string;
-  author?: unknown[];
-  illustrator?: unknown[];
-  expire_datetime?: string | null;
-  series_id?: number | null;
-  max_episode_rating?: MaxEpisodeRating;
-  directors?: CommonPerson[];
-  casts?: CommonCast[];
-  production_companies?: CommonProductionCompany[];
-  simulcast_channel?: unknown;
+  release_weekdays: string[];
+  latest_episode_release_datetime: string;
+  avg_rating: number;
+  logo_img: string | null;
+  color_code: string | null;
+  description: string | null;
+  is_viewing: boolean;
+  highlight_video: CommonHighlightVideo | null;
+  awards: string[];
+  notice: string;
+  tags: string[];
+  production: string | null;
+  air_year_quarter: string | null;
+  copyright: string;
+  author: unknown[];
+  illustrator: unknown[];
+  expire_datetime: string | null;
+  series_id: number | null;
+  max_episode_rating: MaxEpisodeRating;
+  directors: CommonPerson[];
+  casts: CommonCast[];
+  production_companies: CommonProductionCompany[];
+  simulcast_channel: unknown | null;
 };
 
 export type ItemList = ItemsV4ID;
@@ -155,11 +171,11 @@ export type ItemsV1ScheduledExpiredItem = PaginatedResponse<{
 }>;
 
 export type ItemsV2SeriesID = PaginatedResponse<{
-  id?: number;
-  name?: string;
-  img?: string;
-  content_rating?: number | CommonContentRating;
-  images?: CommonImage[];
+  id: number;
+  name: string;
+  img: string;
+  content_rating: CommonContentRating;
+  images: CommonImage[];
 }>;
 
 export type EpisodeProduct = {
@@ -171,47 +187,47 @@ export type EpisodeProduct = {
 };
 
 export type EpisodesV3 = {
-  id?: number;
-  title?: string;
-  subject?: string;
-  description?: string;
-  episode_num?: string;
-  episode_order?: number;
-  thumbnail_path?: string | null;
-  has_preview?: boolean;
-  item_expire_datetime?: string | null;
-  in_app_download?: boolean;
-  is_avod?: boolean;
-  is_free?: boolean;
-  is_viewing?: boolean;
-  published_datetime?: string | null;
-  running_time?: string;
-  progressbar?: unknown;
-  episode_products?: EpisodeProduct[];
-  rating?: MaxEpisodeRating;
-  access_info_list?: unknown[];
-  access_type?: string;
-  is_final?: boolean;
+  id: number;
+  title: string;
+  subject: string;
+  description: string;
+  episode_num: string;
+  episode_order: number;
+  thumbnail_path: string | null;
+  has_preview: boolean;
+  item_expire_datetime: string | null;
+  in_app_download: boolean;
+  is_avod: boolean;
+  is_free: boolean;
+  is_viewing: boolean;
+  published_datetime: string | null;
+  running_time: string;
+  progressbar: null | number;
+  episode_products: EpisodeProduct[];
+  rating: MaxEpisodeRating;
+  access_info_list: unknown[];
+  access_type: string;
+  is_final: boolean;
 };
 
 export type CommentsV1List = PaginatedResponse<{
-  id?: number;
-  parent_comment_id?: number | null;
-  profile?: ProfilesV1MyProfile;
-  content?: string;
-  item?: Partial<ItemsV4ID>;
-  episode?: {
+  id: number;
+  parent_comment_id: number | null;
+  profile: ProfilesV1MyProfile;
+  content: string;
+  item: Partial<ItemsV4ID>;
+  episode: {
     id?: number;
     subject?: string;
     episode_num?: string;
     thumbnail_path?: string | null;
   };
-  created?: Date | unknown;
-  modified?: Date | unknown;
-  count_like?: number;
-  count_reply_comment?: number;
-  is_click_like?: boolean;
-  is_spoiler?: boolean;
+  created: Date | unknown;
+  modified: Date | unknown;
+  count_like: number;
+  count_reply_comment: number;
+  is_click_like: boolean;
+  is_spoiler: boolean;
 }>;
 
 export type CommentItem = {
@@ -338,7 +354,7 @@ export type ProfilesV1MyProfileStatistics = {
 export type MembershipProduct = {
   id?: number;
   name?: string;
-  membership_type?: "basic" | "premium";// | (string & {});
+  membership_type?: "basic" | "premium"; // | (string & {});
   list_price?: number;
   period?: string;
   promotion?: unknown | null;
@@ -358,7 +374,7 @@ export type BillingInfo = {
   is_svod_billing_info?: boolean;
 };
 
-export type BillingV1Info = BillingInfo[];
+export type BillingV1Info = BillingInfo[] | WTF;
 
 export type MembershipsV1Reserved = {
   status?: string;
@@ -374,14 +390,35 @@ export type MembershipsV1Upgrade = {
   days?: number;
 };
 
-export type WTF = { //너를 남길까?
-  detail?: string | unknown;
-  code?: string | unknown;
-  data?: null | unknown;
-  msg?: string | unknown;
-  ip?: string | unknown;
-  country_code?: string | unknown;
-} | { "detail": "재생 가능 시간 초과", "code": "PLAYBACK_EXPIRED" } | { "detail": "대한민국 이외 지역에서는\n저작권 문제로 시청할 수 없습니다.", "code": "BLOCKED_BY_DISALLOWED_ACCESS", "data": null };
+export type WTF =
+  | {
+      detail?: string | unknown;
+      error?: unknown;
+      code?: string | unknown;
+      data?: null | unknown;
+      msg?: string | unknown;
+      ip?: string | unknown;
+      country_code?: string | unknown;
+    }
+  | { detail: "재생 가능 시간 초과"; code: "PLAYBACK_EXPIRED" }
+  | {
+      detail: "대한민국 이외 지역에서는\n저작권 문제로 시청할 수 없습니다.";
+      code: "BLOCKED_BY_DISALLOWED_ACCESS";
+      data: null;
+    }
+  | {
+      code?: "PLAYBACK_DEACTIVATED" | string;
+      detail?: Array<{
+        user_id: number;
+        profile_name: string;
+        item_name: string;
+        device_type: string;
+      }>;
+    }
+  | {
+      detail: "episode_ids, item_id 중에 하나는 필수 값 입니다.";
+      code: "INVALID";
+    };
 
 export type AuthResponse = {
   user: ProfilesV1MyAccount;
@@ -442,30 +479,35 @@ export type PublicStreamingInfo = {
   subtitle_preview_url?: string | null;
 };
 
-export type StreamingInfoV2 = {
-  is_cartoon_network?: boolean;
-  playback_info?: PlaybackInfo;
-  products_info?: ProductsInfo;
-  protected_streaming_info?: ProtectedStreamingInfo;
-  public_streaming_info?: PublicStreamingInfo;
-  play_log_id?: number;
-} | {
-  code?: "PLAYBACK_DEACTIVATED" | string;
-  detail?: Array<{
-    user_id: number;
-    profile_name: string;
-    item_name: string;
-    device_type: string;
-  }>
-};
+export type StreamingInfoV2 =
+  | {
+      is_cartoon_network?: boolean;
+      playback_info?: PlaybackInfo;
+      products_info?: ProductsInfo;
+      protected_streaming_info?: ProtectedStreamingInfo;
+      public_streaming_info?: PublicStreamingInfo;
+      play_log_id?: number;
+    }
+  | {
+      code?: "PLAYBACK_DEACTIVATED" | string;
+      detail?: Array<{
+        user_id: number;
+        profile_name: string;
+        item_name: string;
+        device_type: string;
+      }>;
+    }
+  | WTF;
 
 // DELETE https://api.laftel.net/api/items/v1/44283/recent-video/ -> 204; 최근 기록 삭제
-export type EpisodesV1IDRecentVideo = StreamingInfoV2 & {
-  next_episode?: {
-    id?: number;
-    episode_num?: string;
-  };
-} | WTF;
+export type EpisodesV1IDRecentVideo =
+  | (StreamingInfoV2 & {
+      next_episode?: {
+        id?: number;
+        episode_num?: string;
+      };
+    })
+  | WTF;
 
 export type EpisodesV3IDVideo = StreamingInfoV2;
 
@@ -547,12 +589,12 @@ export type HomeV1RecommendRankingGenre = {
   genre?: string;
   statistics_type?: string;
   item_list?: ItemList[];
-}
+};
 
 export type ItemsV1Purchasable = {
   purchasable?: boolean;
   purchase_type?: string;
-}
+};
 
 export type V10ProductResult = {
   product_no?: number;
@@ -564,7 +606,7 @@ export type V10ProductResult = {
   discount_rate?: number;
   detail_page_path?: string;
   badges?: string[];
-}
+};
 
 // https://store-api.laftel.net/v1.0/products/item_related/?item_id=
 export type V10ProductsItemRelated = PaginatedResponse<V10ProductResult>;
@@ -588,7 +630,7 @@ export type ItemsV2RelatedResult = {
   latest_episode_created?: null | Date;
   average_score?: number;
   rating?: number;
-}
+};
 
 export type ItemsV2IDRelated = PaginatedResponse<ItemsV2RelatedResult>;
 
@@ -605,7 +647,7 @@ export type ItemsV1IDStatistics = {
   count_score_40?: number;
   count_score_45?: number;
   count_score_50?: number;
-}
+};
 
 export type ReviewsV1MyReview = {
   id?: null | number;
@@ -618,10 +660,10 @@ export type ReviewsV1MyReview = {
   item?: null | number;
   created?: null | Date;
   modified?: null | Date;
-}
+};
 
 // POST https://api.laftel.net/api/reviews/v1/list/ {"item":44284,"score":5,"content":"","is_spoiler":false} -> 201 {}
-// PATCH https://api.laftel.net/api/reviews/v1/35910015/ {"score":3.5,"content":"","is_spoiler":false} -> 200 
+// PATCH https://api.laftel.net/api/reviews/v1/35910015/ {"score":3.5,"content":"","is_spoiler":false} -> 200
 
 export type LiveV1Channels = {
   channel?: {
@@ -635,17 +677,22 @@ export type LiveV1Channels = {
   };
   current_program?: LiveV1Programs;
   current_thumbnail?: string;
-}
+};
 
-// https://api.laftel.net/api/episodes/v1/video/permission/?limit=12&offset=0 {"detail":"episode_ids, item_id 중에 하나는 필수 값 입니다.","code":"INVALID"}
-export type EpisodesV1VideoPermission = PaginatedResponse<{
-  episode_id?: number;
-  in_app_download?: boolean;
-  membership_end_datetime?: null | Date;
-  item_expire_datetime?: null | Date;
-  access_type?: null | unknown;
-  access_info_list?: unknown[];
-}>;
+export type EpisodesV1VideoPermission =
+  | PaginatedResponse<{
+      episode_id?: number;
+      in_app_download?: boolean;
+      membership_end_datetime?: null | Date;
+      item_expire_datetime?: null | Date;
+      access_type?: null | unknown;
+      access_info_list?: unknown[];
+    }>
+  | {
+      detail: "episode_ids, item_id 중에 하나는 필수 값 입니다.";
+      code: "INVALID";
+    }
+  | WTF;
 
 export type PlayLogsV1ID = {
   total_play_time?: string;
@@ -654,16 +701,21 @@ export type PlayLogsV1ID = {
   is_player_paused?: boolean;
 } | null;
 
-export type PaymentsV2Billing = {
-  error?: string;
-  code?: string;
-} | unknown;
+export type PaymentsV2Billing =
+  | {
+      error?: string;
+      code?: string;
+    }
+  | WTF
+  | unknown;
 
-export type PaymentsV2PayPasswordCheck = {
-  is_check_available?: boolean;
-  fail_count?: number;
-  fail_count_limit?: number;
-} | {
-  error?: string;
-  code?: string;
-};
+export type PaymentsV2PayPasswordCheck =
+  | {
+      is_check_available?: boolean;
+      fail_count?: number;
+      fail_count_limit?: number;
+    }
+  | {
+      error?: string;
+      code?: string;
+    };
