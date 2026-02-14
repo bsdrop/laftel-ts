@@ -1,4 +1,4 @@
-import { LaftelClient } from "./client.ts";
+import { LaftelClient } from "../src/mod.ts";
 const client = new LaftelClient();
 //client.setUserAgent();
 console.log(await client.autoComplete("귀멸의")); // String[]

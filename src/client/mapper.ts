@@ -1,21 +1,31 @@
 // \r\n같은 변태 규격 표준화하기
-import * as Raw from "./raw.ts";
-import * as Models from "./models.ts";
+import * as Raw from "../types/raw.ts";
+import * as Models from "../types/models.ts";
 
-function toDate(dateValue: Date | string | number): Date | undefined {
-  if (!dateValue) return undefined;
-  if (dateValue instanceof Date) return dateValue;
-  if (
-    typeof dateValue === "string" &&
-    (!dateValue.includes("+") || !dateValue.includes("Z"))
-  )
-    dateValue += "+09:00";
-  try {
-    const date = new Date(dateValue);
-    return isNaN(date.getTime()) ? undefined : date;
-  } catch {
-    return undefined;
+function toDate(value: Date | string | number): Date | undefined {
+  if (!value) return undefined;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? undefined : value;
+
+  if (typeof value === "string") {
+    let v = value.trim();
+
+    if (
+      !v.includes("Z") &&
+      !v.includes("+") &&
+      !v.includes("ST") &&
+      !v.includes("MT") &&
+      !v.includes("TC")
+    )
+      v += "+09:00";
+    if (v.indexOf(" ") == 10) v = v.replace(" ", "T");
+
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? undefined : d;
   }
+
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? undefined : d;
 }
 
 export const mapAnime = (
@@ -26,8 +36,9 @@ export const mapAnime = (
     title: raw.name,
     description: raw.content,
     images: {
-      thumbnail: raw.images?.find((img) => img.option_name === "home_default")
-        ?.img_url,
+      thumbnail: (
+        raw.images?.find((img) => img.option_name === "home_default") || void 0
+      )?.img_url, //raw.images?.at(0)
       logo: raw.logo_img,
     },
     genres:

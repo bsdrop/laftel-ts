@@ -1,7 +1,11 @@
 {
     "name": "@bsdrop/laftel-ts",
     "version": "0.0.1",
-    "exports": "./mod.ts",
+    "exports": "./src/mod.ts",
+    "tasks": {
+        "test": "deno test",
+        "check": "deno check src/mod.ts"
+    },
     "fmt": {
         "useTabs": false,
         "lineWidth": 120,

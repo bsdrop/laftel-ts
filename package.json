@@ -2,13 +2,13 @@
   "name": "@bsdrop/laftel-ts",
   "version": "0.0.1",
   "type": "module",
-  "main": "./index.ts",
+  "main": "./src/mod.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./src/mod.ts"
   },
   "scripts": {
-    "prepare": "node versionify.js",
-    "postinstall": "node genre.js",
+    "prepublishOnly": "node scripts/versionify.js",
+    "postinstall": "node scripts/typeify.js",
     "test:bun": "bun test.ts",
     "test:deno": "deno run --allow-net=api.laftel.net,mediacloud.laftel.net,license.pallycon.com,store-api.laftel.net,cdm-project.com,cdrm-project.com,127.0.0.1:8000 test.ts"
   },

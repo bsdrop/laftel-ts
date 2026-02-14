@@ -1,5 +1,5 @@
-import * as Raw from "./raw.ts";
-import * as Models from "./models.ts";
+import * as Raw from "../types/raw.ts";
+import * as Models from "../types/models.ts";
 import * as Mappers from "./mapper.ts";
 
 export interface ClientConfig {
@@ -76,8 +76,8 @@ export class LaftelClient {
     const res = await this._request<Raw.EpisodesV1IDRecentVideo>(
       `/episodes/v1/${animeId}/recent-video/`,
     );
-    if ("code" in res && res.code === "INVALID") return null;
-    return Mappers.mapStreamInfo(res as Raw.StreamingInfoV2);
+    if ("code" in res) return null;
+    return Mappers.mapStreamInfo(res);
   }
 
   /** @param ignoreLimit - True인 경우, 자동으로 updatePlayback 호출하여 플레이어를 종료했다고 전달합니다. */
@@ -97,12 +97,11 @@ export class LaftelClient {
       });
     return Mappers.mapStreamInfo(raw);
   }
+  getStreamingInfo = this.getVideoStream;
 
   /** 재생 상태를 업데이트합니다.
    * @param {number} playLogId - getVideoStream을 통해 얻은 재생 로그 ID
-   * @param {Object} status - 업데이트할 재생 상태 객체
-   * @param {string} [status.playTime="00:00:00"] - 재생 시간 (형식: HH:MM:SS)
-   * @param {string} [status.offset="00:00:00"] - 오프셋 위치 (형식: HH:MM:SS)
+   * @param {Object} status - 업데이트할 재생 상태 객체 (string 형식: HH:MM:SS)
    */
   async updatePlayback(
     playLogId: number,
@@ -133,7 +132,7 @@ export class LaftelClient {
     );
   }
 
-  async autoComplete(keyword: string): Promise<string[]> {
+  async getAutocomplete(keyword: string): Promise<string[]> {
     return this._request<string[]>(
       `/search/v1/auto_complete/?keyword=${encodeURIComponent(keyword)}`,
     );
@@ -149,6 +148,7 @@ export class LaftelClient {
       next: (res.next as string | null) || void 0,
     };
   }
+  getSearch = this.search;
 
   async getComments(
     episodeId: number,
@@ -243,8 +243,8 @@ export class LaftelClient {
   }
 
   /** @returns likeComment(commentId, false) */
-  async unlikeComment(commentId: number): Promise<boolean> {
-    return await this.likeComment(commentId, false);
+  unlikeComment(commentId: number): Promise<boolean> {
+    return this.likeComment(commentId, false);
   }
 
   async getReviews(
@@ -264,7 +264,7 @@ export class LaftelClient {
     return {
       total: res.count ?? 0,
       items: (res.results ?? []).map(Mappers.mapInteraction) as Models.Review[],
-      next: (res.next as string | null) || void 0,
+      next: res.next ?? undefined,
     };
   }
 
@@ -403,7 +403,7 @@ export class LaftelClient {
     }
 
     if (response.status === 204) {
-      return {} as T;
+      return {} as T; // FIXME
     }
 
     return response.json();
