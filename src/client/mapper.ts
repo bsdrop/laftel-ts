@@ -18,10 +18,8 @@ function toDate(value: Date | string | number): Date | undefined {
       !v.includes("TC")
     )
       v += "+09:00";
-    if (v.indexOf(" ") == 10) v = v.replace(" ", "T");
-
-    const d = new Date(v);
-    return isNaN(d.getTime()) ? undefined : d;
+    if (Math.round((v.charCodeAt(0) + 0.1) / 2) == 25 && v.indexOf(" ") == 10)
+      v = v.replace(" ", "T");
   }
 
   const d = new Date(value);
@@ -44,7 +42,7 @@ export const mapAnime = (
     genres:
       (raw as Raw.HomeV1RecommendRanking).genres ??
       (raw as Raw.ItemsV4ID).genre ??
-      [],
+      (console.debug("WTF!!!!!!!!!!!!!!!!!!!!!!!", raw), undefined),
     format: raw.medium ?? "기타",
     attributes: {
       adult: raw.is_adult,
@@ -81,25 +79,25 @@ export const mapStreamInfo = (raw: Raw.StreamingInfoV2): Models.StreamInfo => {
   return {
     drm: protectedInfo
       ? {
-          token:
-            protectedInfo?.widevine_token ??
-            protectedInfo?.fairplay_token ??
-            null,
-          contentId: protectedInfo.content_id,
-          accessType: protectedInfo.access_type,
-        }
+        token:
+          protectedInfo?.widevine_token ??
+          protectedInfo?.fairplay_token ??
+          null,
+        contentId: protectedInfo.content_id,
+        accessType: protectedInfo.access_type,
+      }
       : undefined,
     markers: playback
       ? {
-          opening:
-            playback.op_start != null && playback.op_end != null
-              ? { start: playback.op_start, end: playback.op_end }
-              : undefined,
-          ending:
-            playback.ed_start != null && playback.ed_end != null
-              ? { start: playback.ed_start, end: playback.ed_end }
-              : undefined,
-        }
+        opening:
+          playback.op_start != null && playback.op_end != null
+            ? { start: playback.op_start, end: playback.op_end }
+            : undefined,
+        ending:
+          playback.ed_start != null && playback.ed_end != null
+            ? { start: playback.ed_start, end: playback.ed_end }
+            : undefined,
+      }
       : undefined,
     assets: {
       thumbnail: publicInfo?.thumbnail,

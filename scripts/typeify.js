@@ -14,6 +14,7 @@ function toUnionType(name, arr) {
     console.error(name, arr, "UB 발생. 개발자에게 로그 보고바람.");
     return `export type ${name} = string`;
   }
+  arr = [...new Set(arr)].sort();
 
   const chunks = [];
   for (let i = 0; i < arr.length; i += 3) {
@@ -21,7 +22,7 @@ function toUnionType(name, arr) {
     chunks.push(slice.map((v) => JSON.stringify(v)).join(" | "));
   }
 
-  return `export type ${name} = ${allowUnknown ? "(string | {})" : ""}\n  | ${chunks.join("\n  | ")};\n\n`;
+  return `export type ${name} = ${allowUnknown ? "(string & {})" : ""}\n  | ${chunks.join("\n  | ")};\n\n`;
 }
 
 let file = "";
