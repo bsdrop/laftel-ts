@@ -460,13 +460,13 @@ export class LaftelClient {
     let fucked = false;
     try {
       new Date(
-        `20${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00:Z`,
+        `20${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00.000Z`,
       );
     } catch {
       fucked = true;
       try {
         new Date(
-          `19${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00:Z`,
+          `19${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00.000Z`,
         );
         fucked = false;
       } catch {}
