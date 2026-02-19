@@ -1,6 +1,6 @@
 {
   "name": "@bsdrop/laftel-ts",
-  "version": "0.0.1",
+  "version": "0.0.0-alpha.4236260",
   "type": "module",
   "main": "./src/mod.ts",
   "exports": {
@@ -10,7 +10,7 @@
     "prepublishOnly": "node scripts/versionify.js",
     "postinstall": "node scripts/typeify.js",
     "test:bun": "bun test.ts",
-    "test:deno": "deno run --allow-net=api.laftel.net,mediacloud.laftel.net,license.pallycon.com,store-api.laftel.net,cdm-project.com,cdrm-project.com,127.0.0.1:8000 test.ts"
+    "test:deno": "deno run --allow-net=api.laftel.net,mediacloud.laftel.net,thumbnails.laftel.net,license.pallycon.com,store-api.laftel.net,cdm-project.com,cdrm-project.com,127.0.0.1:8000,127.0.0.1:9050 tests/client.test.ts"
   },
   "devDependencies": {
     "tsup": "^8.5.1"

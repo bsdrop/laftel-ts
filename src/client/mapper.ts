@@ -79,25 +79,25 @@ export const mapStreamInfo = (raw: Raw.StreamingInfoV2): Models.StreamInfo => {
   return {
     drm: protectedInfo
       ? {
-        token:
-          protectedInfo?.widevine_token ??
-          protectedInfo?.fairplay_token ??
-          null,
-        contentId: protectedInfo.content_id,
-        accessType: protectedInfo.access_type,
-      }
+          token:
+            protectedInfo?.widevine_token ??
+            protectedInfo?.fairplay_token ??
+            null,
+          contentId: protectedInfo.content_id,
+          accessType: protectedInfo.access_type,
+        }
       : undefined,
     markers: playback
       ? {
-        opening:
-          playback.op_start != null && playback.op_end != null
-            ? { start: playback.op_start, end: playback.op_end }
-            : undefined,
-        ending:
-          playback.ed_start != null && playback.ed_end != null
-            ? { start: playback.ed_start, end: playback.ed_end }
-            : undefined,
-      }
+          opening:
+            playback.op_start != null && playback.op_end != null
+              ? { start: playback.op_start, end: playback.op_end }
+              : undefined,
+          ending:
+            playback.ed_start != null && playback.ed_end != null
+              ? { start: playback.ed_start, end: playback.ed_end }
+              : undefined,
+        }
       : undefined,
     assets: {
       thumbnail: publicInfo?.thumbnail,

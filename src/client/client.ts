@@ -1,6 +1,7 @@
 import * as Raw from "../types/raw.ts";
 import * as Models from "../types/models.ts";
 import * as Mappers from "./mapper.ts";
+import { v } from "../version.ts";
 
 export interface ClientConfig {
   baseUrl?: string;
@@ -12,12 +13,16 @@ export class LaftelClient {
   private config: Required<ClientConfig>;
 
   constructor(config: ClientConfig = {}) {
+    if (!config) config = {};
+    if (config.token?.startsWith("Token "))
+      config.token = config.token.substring(6);
+
     this.config = {
       baseUrl: config.baseUrl ?? "https://api.laftel.net/api",
       token: config.token ?? "",
       userAgent:
         config.userAgent ??
-        "Mozilla/5.0 (compatible; LaftelTS +https://github.com/bsdrop/laftel-ts)",
+        `LaftelTS/${v} +https://github.com/bsdrop/laftel-ts`,
     };
   }
 
@@ -30,6 +35,7 @@ export class LaftelClient {
   }
 
   async login(email: string, password: string): Promise<false | string> {
+    // return string vs user (is_adult, 등등 다 담아서 유용할거임)
     const res = await this._request<Raw.AuthResponse>(
       "/authentications/v3/email/",
       {
@@ -101,12 +107,12 @@ export class LaftelClient {
 
   /** 재생 상태를 업데이트합니다.
    * @param {number} playLogId - getVideoStream을 통해 얻은 재생 로그 ID
-   * @param {Object} status - 업데이트할 재생 상태 객체 (string 형식: HH:MM:SS)
+   * @param {Object} status - 업데이트할 재생 상태 객체 (playtime, offset 형식: HH:MM:SS; 기본값: 00:00:00)
    */
   async updatePlayback(
     playLogId: number,
     status: {
-      playTime?: string;
+      playtime?: string;
       offset?: string;
       exited?: boolean;
       paused?: boolean;
@@ -119,10 +125,10 @@ export class LaftelClient {
           {
             method: "PATCH",
             body: JSON.stringify({
-              total_play_time: status.playTime ?? "00:00:00",
-              play_end_offset: status.offset ?? "00:00:00",
-              is_player_exit: status.exited ?? true,
-              is_player_paused: status.paused ?? true,
+              total_play_time: status?.playtime ?? "00:00:00",
+              play_end_offset: status?.offset ?? "00:00:00",
+              is_player_exit: status?.exited ?? true,
+              is_player_paused: status?.paused ?? true,
             }),
           },
           true,
@@ -154,13 +160,41 @@ export class LaftelClient {
     episodeId: number,
     options: {
       limit?: number;
-      offset?: number;
-      sorting?: string;
+      cursor?: Base64URLString; // TODO: FIXME: URL 아닌데요
+      sorting?: "top" | "oldest";
+      mine?: boolean; // TODO: FIXME
     } = {},
   ): Promise<Models.Paginated<Models.Comment>> {
-    const { limit = 10, offset = 0, sorting = "top" } = options;
+    /* TODO: FIXME 와 이색긴 previous도 주네 심지어 커서는 왜이지랄임
+    o, p, r = 오ㅃr(?)
+    > atob("cD0xLjc5OTk5OTk5OTk5OTk5OTg")
+    "p=1.7999999999999998"
+    > atob("cD0xLjc5OTk5OTk5OTk5OTk5OTg=")
+    "p=1.7999999999999998"
+    > atob("bz0yJnI9MSZwPTAuMA==")
+    "o=2&r=1&p=0.0"
+    > atob("bz0yJnA9MS42")
+    "o=2&p=1.6"
+    > atob("cD0zLjA=")
+    "p=3.0"
+    > atob("bz0xMCZwPTAuNA==")
+    "o=10&p=0.4"
+    > atob("bz0yMCZwPTAuNA==")
+    "o=20&p=0.4"
+    > atob("cj0xJnA9MC4w")
+    "r=1&p=0.0"
+    > atob("cD0wLjQ=")
+    "p=0.4"
+    > atob("cD0xLjI=")
+    "p=1.2"
+    > atob("cj0xJnA9MC43Mg==")
+    "r=1&p=0.72"
+    > atob("bz0xJnA9My41OTk5OTk5OTk5OTk5OTk2")
+    "o=1&p=3.5999999999999996"
+    */
+    const { limit = 10, sorting = "top", mine = false } = options;
     const res = await this._request<Raw.CommentsV1List>(
-      `/comments/v1/list/?episode_id=${episodeId}&limit=${limit}&offset=${offset}&sorting=${sorting}`,
+      `/comments/v1/list/?episode_id=${episodeId}&limit=${limit}&sorting=${sorting}`,
     );
     return {
       total: res.count ?? 0,
@@ -178,23 +212,29 @@ export class LaftelClient {
       isSpoiler?: boolean;
       parentId?: number;
     } = {},
-  ): Promise<Models.Comment | false> {
-    const res = await this._request<Raw.CommentItem>("/comments/v1/list/", {
-      method: "POST",
-      body: JSON.stringify({
-        episode: episodeId,
-        content,
-        is_spoiler: options.isSpoiler ?? false,
-        parent_comment: options.parentId,
-      }),
-    });
-    return Mappers.mapInteraction(res) as Models.Comment;
+  ): Promise<boolean> {
+    const res = await this._request<Response>(
+      "/comments/v1/list/",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          episode: episodeId,
+          content,
+          is_spoiler: options.isSpoiler ?? false,
+          parent_comment: options.parentId,
+        }),
+      },
+      true,
+      true,
+    );
+    if (res.status !== 201) return false;
+    return true;
   }
 
   async editComment(
     commentId: number,
     content: string,
-    isSpoiler?: boolean,
+    isSpoiler: boolean,
   ): Promise<Models.Comment | false> {
     const res = await this._request<Raw.CommentItem>(
       `/comments/v1/${commentId}/`,
@@ -202,7 +242,7 @@ export class LaftelClient {
         method: "PATCH",
         body: JSON.stringify({
           content,
-          is_spoiler: isSpoiler ?? false,
+          is_spoiler: isSpoiler ?? false, // FIXME
         }),
       },
       true,
@@ -258,7 +298,7 @@ export class LaftelClient {
     const { limit = 10, offset = 0, sorting = "top" } = options;
     const res = await this._request<
       Raw.PaginatedResponse<Raw.ReviewsV1MyReview>
-    >(
+    >( // TODO: FIXME: confirm
       `/reviews/v1/list/?item_id=${animeId}&limit=${limit}&offset=${offset}&sorting=${sorting}`,
     );
     return {
@@ -270,24 +310,25 @@ export class LaftelClient {
 
   async addReview(
     animeId: number,
-    content: string,
     score: number,
-    options: {
-      isSpoiler?: boolean;
-    } = {},
+    content: string = "",
+    isSpoiler: boolean = false,
   ): Promise<Models.Review | false> {
+    if (!(score % 0.5)) return false;
+    if (score > 5) return false;
+    if (score < 0) return false;
     const res = await this._request<Raw.ReviewsV1MyReview>(
       "/reviews/v1/list/",
       {
         method: "POST",
         body: JSON.stringify({
           item: animeId,
-          content,
+          content: content ?? "",
           score,
-          is_spoiler: options.isSpoiler ?? false,
+          is_spoiler: isSpoiler,
         }),
       },
-    );
+    ); // TODO: FIXME: 아닐거같음
     return Mappers.mapInteraction(res) as Models.Review;
   }
 
@@ -296,8 +337,8 @@ export class LaftelClient {
     score: number,
     content: string,
     isSpoiler?: boolean,
-  ): Promise<Models.Review | false> {
-    const res = await this._request<Raw.ReviewsV1MyReview>(
+  ): Promise<boolean> {
+    const res = await this._request<Response>(
       `/reviews/v1/${reviewId}/`,
       {
         method: "PATCH",
@@ -307,28 +348,42 @@ export class LaftelClient {
           is_spoiler: isSpoiler ?? false,
         }),
       },
+      true,
+      true,
     );
-    return Mappers.mapInteraction(res) as Models.Review;
+    return res.status === 200;
   }
 
   async deleteReview(reviewId: number): Promise<boolean> {
-    await this._request(`/reviews/v1/${reviewId}/`, { method: "DELETE" });
-    return true; // TODO:
+    return (
+      (
+        await this._request<Response>(
+          `/reviews/v1/${reviewId}/`,
+          { method: "DELETE" },
+          true,
+          true,
+        )
+      ).status === 204
+    );
   }
 
   async likeReview(
     reviewId: number,
     isActive: boolean = true,
   ): Promise<boolean> {
-    await this._request(
-      `/reviews/v1/${reviewId}/like/`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ is_active: isActive }),
-      },
-      true,
+    return (
+      (
+        await this._request<Response>(
+          `/reviews/v1/${reviewId}/like/`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({ is_active: isActive }),
+          },
+          true,
+          true,
+        )
+      ).status === 200
     );
-    return true; // TODO:
   }
 
   async unlikeReview(reviewId: number): Promise<boolean> {
@@ -345,7 +400,7 @@ export class LaftelClient {
     );
   }
 
-  /** 모든 기기에서 로그아웃합니다. (세션을 초기화합니다.) */
+  /** 모든 기기에서 로그아웃합니다. (세션 키를 초기화합니다.) */
   async forceLogout(): Promise<boolean> {
     if (!this.config.token) return false;
     let res = await this._request<Response>(
@@ -373,54 +428,59 @@ export class LaftelClient {
   /** if(await removeCard(123456) === true) console.log("Success"); else console.log("Failed (Response is Raw Response)")
    * @param id Raw.BillingInfo.id */
   async removeCard(id: number): Promise<true | Response> {
-    let res = await this._request<Response>( // @ts-ignore 내가 니보다 잘 안다 안데르스 아일스버그 개 병신새끼야 parseInt에는 넘버도 들어간단다. 표준이 아니여도 JSC, QuickJS, V8, 스파이더몽키에서 다 돌아가면 좆도 고려할필요가 없는데 왜지랄이지?
-      `/api/billing/v1/nicepay/${parseInt(id)}`,
+    let res = await this._request<Response>(
+      `/api/billing/v1/nicepay/${parseInt(id as any)}`,
       {
         method: "DELETE",
       },
     );
     if (res.status === 204) return true;
-    else return (console.debug(res), res); // ts씨발련아 못생겨졌잖아 ㅠㅠ || 써야하는데
+    else return (console.debug(res), res);
   } /** removeCard() */
   deleteCard = this.removeCard;
 
   async addCard(payload: {
-    cardNumber: string | number;
+    cardNumber: string | number; // TODO: JSDoc maybv
     expMonth: Raw.from0to12;
     expYear: Raw.from0to99;
     birth: string; // 내가 너는 봐줬다 ㅋㅋ
     pwd: Raw.from0to99;
   }): Promise<Raw.BillingInfo | string> {
-    // TODO: FIXME: 존나더러운건 둘째치고 에러를 하나하나씩 체크해서 유저 입장에서도 좆같음
+    // TODO: FIXME: 존나더러운건 둘째치고 에러를 하나하나씩 체크해서 유저 입장에서도 좆같음. 걍 클라에서 검증하는거 뺴야할지도
     if (!payload || typeof payload != "object")
       return "페이로드가 입력되지 않았습니다.";
-    let cardNumber = payload.cardNumber?.toString() || ""; //(return '카드 번호 오류');
-    if (cardNumber.length > 16)
-      cardNumber = cardNumber.toString().replace(/\D/g, "");
-    if (cardNumber.length !== 16) return "카드 번호 오류";
+    let cardNumber = payload.cardNumber?.toString();
+    if (this._checkCard(cardNumber)) return "카드 번호 오류";
+    cardNumber = cardNumber.toString().replace(/\D/g, "");
 
-    let s = 0,
-      d = false;
-    for (let i = cardNumber.length - 1; i >= 0; i--) {
-      let j = parseInt(cardNumber[i]);
-      if (d) {
-        j *= 2;
-        if (j > 9) j -= 9;
-      }
-      ((s += j), (d = !d));
-    }
-    if (s % 10 !== 0) return "카드 번호 오류";
     if (payload.birth?.toString()?.length === 8)
       payload.birth = payload.birth.toString().substring(2, 8);
     if (payload.birth?.toString()?.length !== 6)
-      return "생년월일은 6자리여야 합니다.";
+      return "생년월일은 6자리여야 합니다. (YYMMDD)";
+    let fucked = false;
+    try {
+      new Date(
+        `20${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00:Z`,
+      );
+    } catch {
+      fucked = true;
+      try {
+        new Date(
+          `19${payload.birth[0]}${payload.birth[1]}-${payload.birth[2]}${payload.birth[3]}-${payload.birth[4]}${payload.birth[5]}T00:00:00:Z`,
+        );
+        fucked = false;
+      } catch {}
+    }
+    if (fucked) return "잘못된 생년월일입니다.";
     let expMonth = parseInt((payload.expMonth || 0) as any);
     if (expMonth <= 0 || expMonth > 12)
       return "카드 만료 기간이 유효하지 않습니다.";
 
     if (payload.expYear?.toString().length == 4) {
-      if (payload.expYear.toString().startsWith("20")) { //@ts-ignore 걍 TS 포기함 ㅅㄱ
-        payload.expYear = payload.expYear.toString().substring(2, 4);
+      if (payload.expYear.toString().startsWith("20")) {
+        payload.expYear = payload.expYear
+          .toString()
+          .substring(2, 4) as Raw.from0to99;
       } else if (payload.expYear.toString().startsWith("2"))
         return "더 이상은 이 SDK를 사용할 수 없습니다.";
     }
@@ -438,7 +498,8 @@ export class LaftelClient {
     if (typeof payload?.pwd === "number") {
       pwd = payload.pwd.toString();
       if (pwd.length == 1) pwd = `0${pwd}`.substring(0, 2);
-      else if (pwd.length > 2) return "카드 비밀번호 앞 2자리를 string으로 입력하십시오.";
+      else if (pwd.length > 2)
+        return "카드 비밀번호 앞 2자리를 string으로 입력하십시오.";
     } else if (typeof payload?.pwd === "string") pwd = payload.pwd;
     if (!pwd) return "카드 비밀번호가 유효하지 않습니다.";
     if (pwd.length == 4) pwd = pwd.substring(0, 2);
@@ -448,11 +509,13 @@ export class LaftelClient {
         : "카드 비밀번호가 유효하지 않습니다.";
 
     return "구현되지 않았습니다.";
-    let res = await this._request<{
-      msg?: string;
-      code?: string;
-      data?: Raw.BillingInfo;
-    }>("/billing/v1/nicepay/", { method: "POST", body: undefined });
+    let res = await this._request<Response>(
+      "/billing/v1/nicepay/",
+      { method: "POST", body: undefined },
+      true,
+      true,
+    );
+    if (res.status !== 201) return `좆망했습니다.\n${res}\n${await res.text()}`; // json.code ?? json.detail ?? json.msg
     ({
       url: "https://api.laftel.net/api/billing/v1/nicepay/",
       method: "POST",
@@ -481,6 +544,25 @@ export class LaftelClient {
       },
     });
   }
+
+  /** 결제 비밀번호를 초기화하게 되면 보안상의 이유로 카드도 모두 삭제됨 */
+  async resetPayPassword(): Promise<boolean> {
+    return (
+      (
+        await this._request<Response>(
+          "/billing/v1/password/",
+          { method: "DELETE" },
+          true,
+          true,
+        )
+      ).status === 204
+    );
+  }
+
+  /** 결제 비밀번호 초기화 요청을 전달하지만 보안상의 이유로 등록된 카드도 모두 삭제됨
+   * @alias resetPayPassword */ deleteCards = this.resetPayPassword;
+  /** 결제 비밀번호 초기화 요청을 전달하지만 보안상의 이유로 등록된 카드도 모두 삭제됨
+   * @alias resetPayPassword */ removeCards = this.resetPayPassword;
 
   /** @private */
   private async _request<T>(
@@ -546,5 +628,24 @@ export class LaftelClient {
     }
 
     return response.json();
+  }
+
+  /** @private */
+  private _checkCard(number: string): boolean {
+    number = number.toString().replace(/\D/g, "");
+    if (number.length !== 16) return false; // amex?
+
+    let s = 0,
+      d = false;
+    for (let i = number.length - 1; i >= 0; i--) {
+      let j = parseInt(number[i]);
+      if (d) {
+        j *= 2;
+        if (j > 9) j -= 9;
+      }
+      ((s += j), (d = !d));
+    }
+    if (s % 10 !== 0) return false;
+    return true;
   }
 }
