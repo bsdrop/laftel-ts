@@ -415,7 +415,7 @@ export class LaftelClient {
   async getCardList(): Promise<Raw.BillingInfo[] | false> {
     return (
       (await this._request<Raw.BillingInfo[]>(
-        "/api/billing/v1/info/",
+        "/billing/v1/info/",
         undefined,
         true,
       )) ?? false
@@ -426,7 +426,7 @@ export class LaftelClient {
    * @param id Raw.BillingInfo.id */
   async removeCard(id: number): Promise<true | Response> {
     let res = await this._request<Response>(
-      `/api/billing/v1/nicepay/${parseInt(id as any)}`,
+      `/billing/v1/nicepay/${parseInt(id as any)}`,
       {
         method: "DELETE",
       },
